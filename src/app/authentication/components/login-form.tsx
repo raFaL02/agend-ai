@@ -1,8 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import z from "zod";
+import { toast } from "sonner";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const loginSchema = z.object({
   email: z
@@ -29,10 +33,11 @@ const loginSchema = z.object({
     .trim()
     .min(1, { message: "Email é obrigatório" })
     .email({ message: "Email inválido" }),
-  password: z.string().trim().min(8, { message: "Senha é obrigatória" }),
+  password: z.string().trim().min(8, { message: "Senha incorreta" }),
 });
 
-export function LoginForm() {
+const LoginForm = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -41,19 +46,32 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log(values);
-  }
+  const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
+    await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: () => {
+          toast.error("E-mail ou senha inválidos.");
+        },
+      },
+    );
+  };
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>Faça login para continuar</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>Faça login para continuar</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
             <FormField
               control={form.control}
               name="email"
@@ -84,12 +102,24 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-          </form>
-        </Form>
-      </CardContent>
-      <CardFooter>
-        <Button>Entrar</Button>
-      </CardFooter>
+          </CardContent>
+          <CardFooter>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Entrar"
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
     </Card>
   );
-}
+};
+
+export default LoginForm;
