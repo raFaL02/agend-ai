@@ -40,7 +40,7 @@ const registerSchema = z.object({
     .min(8, { message: "Senha deve ter pelo menos 8 caracteres" }),
 });
 
-export function SignUpForm() {
+const SignUpForm = () => {
   const router = useRouter();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -144,4 +144,6 @@ export function SignUpForm() {
       </Form>
     </Card>
   );
-}
+};
+
+export default SignUpForm;
