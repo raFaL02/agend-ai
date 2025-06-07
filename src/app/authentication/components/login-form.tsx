@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -63,6 +64,13 @@ const LoginForm = () => {
     );
   };
 
+  const handleGoogleLogin = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+  };
+
   return (
     <Card>
       <Form {...form}>
@@ -104,17 +112,28 @@ const LoginForm = () => {
             />
           </CardContent>
           <CardFooter>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                "Entrar"
-              )}
-            </Button>
+            <div className="w-full space-y-2">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                type="button"
+                onClick={handleGoogleLogin}
+              >
+                <FcGoogle className="mr-2 h-4 w-4" />
+                Entrar com Google
+              </Button>
+            </div>
           </CardFooter>
         </form>
       </Form>
